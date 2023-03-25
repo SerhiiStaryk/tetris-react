@@ -6,7 +6,7 @@ import { StyledTetrisWrapper, StyledTetris } from './styles/StyledTetris';
 import { usePlayer } from '../hooks/usePlayer';
 import { useStage } from '../hooks/useStage';
 import { useState } from 'react';
-import { createStage } from '../gameHelpers';
+import { createStage, checkCollision } from '../gameHelpers';
 
 const Tetris = () => {
 	const [dropTime, setDropTime] = useState(null);
@@ -18,17 +18,30 @@ const Tetris = () => {
 	// console.log('re-render');
 
 	const movePlayer = (direction) => {
-		updatePlayerPos({ x: direction, y: 0 });
+		if (!checkCollision(player, stage, { x: direction, y: 0 })) {
+			updatePlayerPos({ x: direction, y: 0 });
+		}
 	};
 
 	const startGame = () => {
 		//reset everything
 		setStage(createStage());
 		resetPlayer();
+		setGameOver(false);
 	};
 
 	const drop = () => {
-		updatePlayerPos({ x: 0, y: 1, collided: false });
+		if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+			updatePlayerPos({ x: 0, y: 1, collided: false });
+		} else {
+			//Game over
+			if (player.pos.y < 1) {
+				console.log('game over');
+				setGameOver(true);
+				setDropTime(null);
+			}
+			updatePlayerPos({ x: 0, y: 0, collided: true });
+		}
 	};
 
 	const dropPlayer = () => {
@@ -40,11 +53,11 @@ const Tetris = () => {
 			if (keyCode === 37) {
 				movePlayer(-1);
 			}
-			
+
 			if (keyCode === 39) {
 				movePlayer(1);
 			}
-			
+
 			if (keyCode === 40) {
 				dropPlayer();
 			}

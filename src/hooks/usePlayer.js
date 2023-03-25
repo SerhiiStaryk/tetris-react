@@ -20,7 +20,6 @@ export const usePlayer = () => {
 				collided,
 			};
 		});
-		console.log(player);
 	};
 
 	const resetPlayer = useCallback(() => {

@@ -4,9 +4,7 @@ import { createStage } from '../gameHelpers';
 export const useStage = (player, resetPlayer) => {
 	const [stage, setStage] = useState(createStage());
 
-
 	const updateStage = useCallback(
-		
 		(prevStage) => {
 			//first flash the stage
 			const newStage = prevStage.map((row) =>
@@ -24,13 +22,18 @@ export const useStage = (player, resetPlayer) => {
 					}
 				});
 			});
+
+			//then check is we collided
+			if (player.collided) {
+				resetPlayer();
+			}
+
 			return newStage;
 		},
-		[player]
+		[player, resetPlayer]
 	);
 
 	useEffect(() => {
-		console.log('render');
 		setStage((prev) => updateStage(prev));
 	}, [updateStage]);
 
