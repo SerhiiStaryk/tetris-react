@@ -1,8 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createStage } from '../gameHelpers';
 
 export const useStage = (player, resetPlayer) => {
 	const [stage, setStage] = useState(createStage());
+	const [rowsCleared, setRowsCleared] = useState(0);
+
+	const sweepRows = (newStage) =>
+		newStage.reduce((ack, row) => {
+			if (row.findIndex((cell) => cell[0] === 0) === -1) {
+				setRowsCleared((prev) => prev + 1);
+				ack.unshift(new Array(newStage[0].length).fill([0, 'clear']));
+				return ack;
+			}
+			ack.push(row);
+			return ack;
+		}, []);
 
 	const updateStage = useCallback(
 		(prevStage) => {
@@ -26,6 +38,7 @@ export const useStage = (player, resetPlayer) => {
 			//then check is we collided
 			if (player.collided) {
 				resetPlayer();
+				return sweepRows(newStage);
 			}
 
 			return newStage;
@@ -34,8 +47,9 @@ export const useStage = (player, resetPlayer) => {
 	);
 
 	useEffect(() => {
+		setRowsCleared(0);
 		setStage((prev) => updateStage(prev));
-	}, [updateStage]);
+	}, [updateStage, rowsCleared]);
 
-	return [stage, setStage];
+	return [stage, setStage, rowsCleared];
 };
